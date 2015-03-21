@@ -1,0 +1,17 @@
+{
+    "contents" : "\ntraining = read.csv(\"UCI HAR Dataset/train/X_train.txt\", sep=\"\", header=FALSE)\ntraining[,562] = read.csv(\"UCI HAR Dataset/train/Y_train.txt\", sep=\"\", header=FALSE)\ntraining[,563] = read.csv(\"UCI HAR Dataset/train/subject_train.txt\", sep=\"\", header=FALSE)\n\ntesting = read.csv(\"UCI HAR Dataset/test/X_test.txt\", sep=\"\", header=FALSE)\ntesting[,562] = read.csv(\"UCI HAR Dataset/test/Y_test.txt\", sep=\"\", header=FALSE)\ntesting[,563] = read.csv(\"UCI HAR Dataset/test/subject_test.txt\", sep=\"\", header=FALSE)\n\nactivityLabels = read.csv(\"UCI HAR Dataset/activity_labels.txt\", sep=\"\", header=FALSE)\n\n# Read features and make the feature names better suited for R with some substitutions\nfeatures = read.csv(\"UCI HAR Dataset/features.txt\", sep=\"\", header=FALSE)\nfeatures[,2] = gsub('-mean', 'Mean', features[,2])\nfeatures[,2] = gsub('-std', 'Std', features[,2])\nfeatures[,2] = gsub('[-()]', '', features[,2])\n\n# Merge training and test sets together\nallData = rbind(training, testing)\n\n# Get only the data on mean and std. dev.\ncolsWeWant <- grep(\".*Mean.*|.*Std.*\", features[,2])\n# First reduce the features table to what we want\nfeatures <- features[colsWeWant,]\n# Now add the last two columns (subject and activity)\ncolsWeWant <- c(colsWeWant, 562, 563)\n# And remove the unwanted columns from allData\nallData <- allData[,colsWeWant]\n# Add the column names (features) to allData\ncolnames(allData) <- c(features$V2, \"Activity\", \"Subject\")\ncolnames(allData) <- tolower(colnames(allData))\n\ncurrentActivity = 1\nfor (currentActivityLabel in activityLabels$V2) {\n  allData$activity <- gsub(currentActivity, currentActivityLabel, allData$activity)\n  currentActivity <- currentActivity + 1\n}\n\nallData$activity <- as.factor(allData$activity)\nallData$subject <- as.factor(allData$subject)\n\ntidy = aggregate(allData, by=list(activity = allData$activity, subject=allData$subject), mean)\n# Remove the subject and activity column, since a mean of those has no use\ntidy[,90] = NULL\ntidy[,89] = NULL\nwrite.table(tidy, \"tidy.txt\", sep=\"\\t\")\n",
+    "created" : 1426967621346.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3233815589",
+    "id" : "75A8067A",
+    "lastKnownWriteTime" : 1426968025,
+    "path" : "C:/Users/Dell/Desktop/akshay/cleaningdata/UCI HAR Dataset/run_analysis.R",
+    "project_path" : "run_analysis.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}
